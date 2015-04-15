@@ -43,7 +43,6 @@ var fb = new Facebook({
     secret: FACEBOOK_APP_SECRET
 }).setAccessToken(FACEBOOK_ACCESS_TOKEN);
 
-
 //connect to database
 mongoose.connect(process.env.MONGODB_CONNECTION_URL);
 var db = mongoose.connection;
@@ -196,30 +195,12 @@ app.get('/login', function(req, res){
 });
 
 app.get('/account', ensureAuthenticated, function(req, res){
-  res.render('account', {user: req.user});
-  app.get('/feed', ensureAuthenticated, function(req, res){
   var query  = models.User.where({ name: req.user.username });
   query.findOne(function (err, user) {
-    if (err) return handleError(err);
-    if (user) {
-      // doc may be null if no document matched
-      Instagram.users.recent({
-        access_token: user.access_token,
-        complete: function(data) {
-          //Map will iterate through the returned data obj
-          var feedArr = data.map(function(item) {
-            //create temporary json object
-            tempJSON = {};
-            tempJSON.url = item.caption.text;
-            //insert json object into image array
-            return tempJSON;
-          });
-          res.render('feedPhotos', {feedPhotos: feedArr});
-        }
-      }); 
-    }
+    if (err) return handleError(err);   
   });
-});
+
+  res.render('account', {user: req.user});
 });
 
 app.get('/photos', ensureAuthenticated, function(req, res){
@@ -245,6 +226,30 @@ app.get('/photos', ensureAuthenticated, function(req, res){
     }
   });
 });
+
+app.get('/feed', ensureAuthenticated, function(req, res) {
+  var query = models.User.where({ name: req.user.username });
+  query.findOne(function (err, user) {
+    if (err) return handleError(err);
+    if (user) {
+      // doc may be null if no document matched
+      Instagram.users.self({
+        access_token: user.access_token,
+        complete: function(data) {
+          //Map will iterate through the returned data obj
+          var feedArr = data.map(function(item) {
+            //create temporary json object
+            tempJSON = {};
+            tempJSON.url = item.images.low_resolution.url;
+            //insert json object into image array
+            return tempJSON;
+          });
+          res.render('feed', {feed: feedArr});
+        }
+      }); 
+    }
+  })
+})
 
 
 // GET /auth/instagram
@@ -377,6 +382,8 @@ graph.setAccessToken(FACEBOOK_ACCESS_TOKEN);
 
 graph.get('/me/friends/', function(err, data) {
 
+});
+
 FB.api(
     "/me",
     function (response) {
@@ -387,7 +394,7 @@ FB.api(
 );
    
 
-});
+
 
 
 
