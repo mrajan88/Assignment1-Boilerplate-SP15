@@ -17,6 +17,8 @@ var util = require('util');
 var FacebookStrategy = require('passport-facebook').Strategy;
 var logger = require('morgan');
 var methodOverride = require('method-override');
+var graph = require('fbgraph');
+var FB = require('fb');
 
 //local dependencies
 var models = require('./models');
@@ -40,6 +42,7 @@ var fb = new Facebook({
     appId: FACEBOOK_APP_ID,
     secret: FACEBOOK_APP_SECRET
 }).setAccessToken(FACEBOOK_ACCESS_TOKEN);
+
 
 //connect to database
 mongoose.connect(process.env.MONGODB_CONNECTION_URL);
@@ -194,6 +197,29 @@ app.get('/login', function(req, res){
 
 app.get('/account', ensureAuthenticated, function(req, res){
   res.render('account', {user: req.user});
+  app.get('/feed', ensureAuthenticated, function(req, res){
+  var query  = models.User.where({ name: req.user.username });
+  query.findOne(function (err, user) {
+    if (err) return handleError(err);
+    if (user) {
+      // doc may be null if no document matched
+      Instagram.users.recent({
+        access_token: user.access_token,
+        complete: function(data) {
+          //Map will iterate through the returned data obj
+          var feedArr = data.map(function(item) {
+            //create temporary json object
+            tempJSON = {};
+            tempJSON.url = item.caption.text;
+            //insert json object into image array
+            return tempJSON;
+          });
+          res.render('feedPhotos', {feedPhotos: feedArr});
+        }
+      }); 
+    }
+  });
+});
 });
 
 app.get('/photos', ensureAuthenticated, function(req, res){
@@ -219,35 +245,6 @@ app.get('/photos', ensureAuthenticated, function(req, res){
     }
   });
 });
-
-
-/*
-app.get('/feed', ensureAuthenticated, function(req, res){
-  var query  = models.User.where({ name: req.user.username });
-  query.findOne(function (err, user) {
-    if (err) return handleError(err);
-    if (user) {
-      // doc may be null if no document matched
-      Instagram.users.recent({
-        access_token: user.access_token,
-        complete: function(data) {
-          //Map will iterate through the returned data obj
-          data.map(function(item) {
-            //create temporary json object
-            tempJSON = {};
-            tempJSON.url = item.images.standard_resolution.url;
-            //insert json object into image array
-            imageArr.push(tempJSON);
-          });
-          data = {imageArray: imageArr, caption:instagram.caption.text};
-    //return data to the webpage
-    res.render('caption', data);
-        }
-      }); 
-    }
-  });
-});
-*/
 
 
 // GET /auth/instagram
@@ -283,7 +280,9 @@ http.createServer(app).listen(app.get('port'), function() {
 });
 
 
+
 //FACEBOOK
+
 
 
 // Permissions
@@ -300,6 +299,8 @@ app.get('/auth/facebook',
 // Facebook will redirect the user back to the application at
 //     /auth/facebook/callback
 app.get('/auth/facebook', passport.authenticate('facebook'));
+
+app.get('/auth/facebook',passport.authenticate('facebook', { scope: ['user_likes'] }));
 
 // Facebook will redirect the user to this URL after approval.  Finish the
 // authentication process by attempting to obtain an access token.  If
@@ -372,6 +373,23 @@ app.get('/logout', function(req, res){
 app.get('/auth/facebook',
   passport.authenticate('facebook', { display: 'touch' }));
 
+graph.setAccessToken(FACEBOOK_ACCESS_TOKEN);
+
+graph.get('/me/friends/', function(err, data) {
+
+FB.api(
+    "/me",
+    function (response) {
+      if (response && !response.error) {
+        /* handle the result */
+      }
+    }
+);
+   
+
+});
+
+
 
 // Simple route middleware to ensure user is authenticated.
 //   Use this route middleware on any resource that needs to be protected.  If
@@ -382,3 +400,4 @@ function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
   res.redirect('/login')
 }
+
