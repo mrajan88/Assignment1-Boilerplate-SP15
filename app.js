@@ -194,22 +194,14 @@ app.get('/login', function(req, res){
   res.render('login', { user: req.user });
 });
 
+
 app.get('/account', ensureAuthenticated, function(req, res){
-  var query  = models.User.where({ name: req.user.username });
-  query.findOne(function (err, user) {
-    if (err) return handleError(err);   
-  });
-
-  res.render('account', {user: req.user});
-});
-
-app.get('/photos', ensureAuthenticated, function(req, res){
   var query  = models.User.where({ name: req.user.username });
   query.findOne(function (err, user) {
     if (err) return handleError(err);
     if (user) {
       // doc may be null if no document matched
-      Instagram.users.liked_by_self({
+      Instagram.users.self({
         access_token: user.access_token,
         complete: function(data) {
           //Map will iterate through the returned data obj
@@ -217,10 +209,11 @@ app.get('/photos', ensureAuthenticated, function(req, res){
             //create temporary json object
             tempJSON = {};
             tempJSON.url = item.images.low_resolution.url;
+            tempJSON.caption = item.caption.text;
             //insert json object into image array
             return tempJSON;
           });
-          res.render('photos', {photos: imageArr});
+          res.render('account', {user: req.user, photos: imageArr});
         }
       }); 
     }
@@ -243,14 +236,18 @@ app.get('/feed', ensureAuthenticated, function(req, res) {
             tempJSON.url = item.images.low_resolution.url;
             //insert json object into image array
             return tempJSON;
+            tempJSON2 = {};
+            tempJSON2.url = item.caption.text;
+            //insert json object into image array
+            return tempJSON2; 
           });
           res.render('feed', {feed: feedArr});
+          // res.render('caption', {caption: captionArr})
         }
       }); 
     }
   })
 })
-
 
 // GET /auth/instagram
 //   Use passport.authenticate() as route middleware to authenticate the
@@ -378,6 +375,37 @@ app.get('/logout', function(req, res){
 app.get('/auth/facebook',
   passport.authenticate('facebook', { display: 'touch' }));
 
+app.get('/photos', ensureAuthenticated, function(req, res){
+var query = models.User.where()
+
+})
+
+/*
+Facebook.get('/' + req.user.id, function(req, res)) {
+Facebook.setAccessToken(FACEBOOK_ACCESS_TOKEN)
+query.findOne(function (err, user) {
+  if(err) return handleError(err);
+      if (user) {
+      // doc may be null if no document matched
+      Facebook.users.self({
+        access_token: user.access_token,
+        complete: function(data) {
+          //Map will iterate through the returned data obj
+          var imageArr = data.map(function(item) {
+            //create temporary json object
+            tempJSON = {};
+            tempJSON.url = item.images.low_resolution.url;
+            tempJSON.caption = item.caption.text;
+            //insert json object into image array
+            return tempJSON;
+          });
+          res.render('account', {user: req.user, photos: imageArr});
+        }
+      }); 
+    }
+})
+
+
 graph.setAccessToken(FACEBOOK_ACCESS_TOKEN);
 
 graph.get('/me/friends/', function(err, data) {
@@ -388,12 +416,12 @@ FB.api(
     "/me",
     function (response) {
       if (response && !response.error) {
-        /* handle the result */
+        /* handle the result 
       }
     }
 );
    
-
+*/
 
 
 

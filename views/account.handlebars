@@ -4,6 +4,13 @@ hello account
 <p>Name: {{user.displayName}}</p>
 <p>Gender: {{user.gender}}</p>
 
+{{#each photos}}
+  <img src="{{url}}" class="img-responsive" class="img hashtag-img">
+  <p>{{caption}}</p>
+{{/each}}
+
+
+
 <script>
       window.fbAsyncInit = function() {
         FB.init({
