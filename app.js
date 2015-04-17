@@ -101,12 +101,10 @@ passport.use(new InstagramStrategy({
   }
 ));
 
+// Passport session setup
+
 var passport = require('passport')
   , FacebookStrategy = require('passport-facebook').Strategy;
-
-
-
-// Passport session setup
 
 // Passport session setup.
 //   To support persistent login sessions, Passport needs to be able to
@@ -123,7 +121,6 @@ passport.deserializeUser(function(obj, done) {
   done(null, obj);
 });
 
-
 // Use the FacebookStrategy within Passport.
 //   Strategies in Passport require a `verify` function, which accept
 //   credentials (in this case, an accessToken, refreshToken, and Facebook
@@ -138,23 +135,20 @@ passport.use(new FacebookStrategy({
     models.User.findOrCreate({
       "name": profile.username,
       "id": profile.id,
-      "access_token": accessToken 
+      "access_token": accessToken
     }, function(err, user, created) {
       
       // created will be true here
       models.User.findOrCreate({}, function(err, user, created) {
         // created will be false here
         process.nextTick(function () {
-          // To keep the example simple, the user's Instagram profile is returned to
-          // represent the logged-in user.  In a typical application, you would want
-          // to associate the Instagram account with a user record in your database,
-          // and return that user instead.
           return done(null, profile);
         });
       })
     });
   }
 ));
+
 
 //Configures the Template engine
 app.engine('handlebars', handlebars({defaultLayout: 'layout'}));
@@ -219,35 +213,6 @@ app.get('/account', ensureAuthenticated, function(req, res){
     }
   });
 });
-
-app.get('/feed', ensureAuthenticated, function(req, res) {
-  var query = models.User.where({ name: req.user.username });
-  query.findOne(function (err, user) {
-    if (err) return handleError(err);
-    if (user) {
-      // doc may be null if no document matched
-      Instagram.users.self({
-        access_token: user.access_token,
-        complete: function(data) {
-          //Map will iterate through the returned data obj
-          var feedArr = data.map(function(item) {
-            //create temporary json object
-            tempJSON = {};
-            tempJSON.url = item.images.low_resolution.url;
-            //insert json object into image array
-            return tempJSON;
-            tempJSON2 = {};
-            tempJSON2.url = item.caption.text;
-            //insert json object into image array
-            return tempJSON2; 
-          });
-          res.render('feed', {feed: feedArr});
-          // res.render('caption', {caption: captionArr})
-        }
-      }); 
-    }
-  })
-})
 
 // GET /auth/instagram
 //   Use passport.authenticate() as route middleware to authenticate the
@@ -363,7 +328,7 @@ app.get('/auth/facebook',
 app.get('/auth/facebook/callback', 
   passport.authenticate('facebook', { failureRedirect: '/login' }),
   function(req, res) {
-    res.redirect('/');
+    res.redirect('/account');
   });
 
 app.get('/logout', function(req, res){
@@ -380,9 +345,16 @@ var query = models.User.where()
 
 })
 
+
+
 /*
-Facebook.get('/' + req.user.id, function(req, res)) {
-Facebook.setAccessToken(FACEBOOK_ACCESS_TOKEN)
+Facebook.setAccessToken(FACEBOOK_ACCESS_TOKEN);
+
+var params = { fields: "cover" };
+graph.get("me", params,  function(err, coverResponse) {
+   console.log(res); 
+});   
+
 query.findOne(function (err, user) {
   if(err) return handleError(err);
       if (user) {
@@ -406,17 +378,19 @@ query.findOne(function (err, user) {
 })
 
 
-graph.setAccessToken(FACEBOOK_ACCESS_TOKEN);
 
-graph.get('/me/friends/', function(err, data) {
+Facebook.get('/' + req.user.id, function(req, res)) {
+F
 
-});
+
+
+
 
 FB.api(
     "/me",
     function (response) {
       if (response && !response.error) {
-        /* handle the result 
+      
       }
     }
 );

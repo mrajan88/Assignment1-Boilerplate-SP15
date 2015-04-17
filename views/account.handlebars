@@ -1,14 +1,30 @@
-hello account
-<p>ID: {{user.id}}</p>
-<p>Username: {{user.username}}</p>
-<p>Name: {{user.displayName}}</p>
-<p>Gender: {{user.gender}}</p>
+<div class="jumbotron" id="homejumbotron">
+<div class="container">
+  <h1>Hello {{user.displayName}}, aka <a target="_blank" href="https://instagram.com/{{user.username}}">@{{user.username}}!</a></h1>
 
+  <p class="lead">Gender: {{user.gender}}</p>
+  <p class="lead">ID: {{user.id}}</p>
+</div>
+</div>
+
+
+
+
+<div class="container" id="photoscont">
+<div class="page-header">
+  <h1>Your Instagram Feed</h1>
+</div>
 {{#each photos}}
-  <img src="{{url}}" class="img-responsive" class="img hashtag-img">
-  <p>{{caption}}</p>
+<div id="smallimages">
+<div class="thumbnail">
+<img src="{{url}}">
+ </div>
+<div class="caption">
+<p>{{caption}}</p>
+</div>
 {{/each}}
-
+</div>
+</div>
 
 
 <script>
@@ -19,7 +35,6 @@ hello account
           version    : 'v2.3'
         });
       };
-
       (function(d, s, id){
          var js, fjs = d.getElementsByTagName(s)[0];
          if (d.getElementById(id)) {return;}
@@ -27,8 +42,6 @@ hello account
          js.src = "//connect.facebook.net/en_US/sdk.js";
          fjs.parentNode.insertBefore(js, fjs);
        }(document, 'script', 'facebook-jssdk'));
-
-
  </script>
 
 
