@@ -188,7 +188,6 @@ app.get('/login', function(req, res){
   res.render('login', { user: req.user });
 });
 
-
 app.get('/account', ensureAuthenticated, function(req, res){
   var query  = models.User.where({ name: req.user.username });
   query.findOne(function (err, user) {
