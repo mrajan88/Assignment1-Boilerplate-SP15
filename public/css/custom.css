@@ -36,10 +36,14 @@ margin-bottom: 10px;
 	text-align: center;
 }
 #smallimages{
-max-width: 306px;
 
 
 }
 #photoscont{
 	text-align: center;
+}
+#logoutbutton{
+position:fixed;
+right:0px;
+bottom: 0px;
 }
