@@ -1,6 +1,6 @@
 <div class="jumbotron" id="homejumbotron">
 <div class="container">
-  <h1>Hello {{user.displayName}}, aka <a target="_blank" href="https://instagram.com/{{user.username}}">@{{user.username}}!</a></h1>
+  <h1>Hello {{user.displayName}}, AKA <a target="_blank" href="https://instagram.com/{{user.username}}">@{{user.username}}!</a></h1>
 
   <p class="lead">Gender: {{user.gender}}</p>
   <p class="lead">ID: {{user.id}}</p>
@@ -12,19 +12,21 @@
 
 <div class="container" id="photoscont">
 <div class="page-header">
-  <h1>Your Instagram Feed</h1>
+  <h1>Your Feed</h1>
 </div>
 {{#each photos}}
-<div id="smallimages">
-<div class="thumbnail">
-<img src="{{url}}">
- </div>
-<div class="caption">
-<p>{{caption}}</p>
-</div>
+<div class="col-xs-6 col-md-3">
+    <div class="thumbnail" id="smallimages">
+      <img src="{{url}}">
+      <div class="caption">
+        <p>{{caption}}</p>
+      </div>
+    </div>
+  </div>
 {{/each}}
 </div>
-</div>
+
+<a class="btn btn-danger" id="logoutbutton" href="/" role="button">Logout</a>
 
 
 <script>
