@@ -47,3 +47,10 @@ position:fixed;
 right:0px;
 bottom: 0px;
 }
+
+#feedbutton{
+position:fixed;
+left:0px;
+bottom: 0px;
+margin-bottom:0px;
+}

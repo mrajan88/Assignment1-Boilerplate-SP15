@@ -1,4 +1,36 @@
+<div class="jumbotron" id="homejumbotron">
+
+<div class="container">
+
+  <h1>Hello {{user.displayName}}, AKA <a target="_blank" href="https://instagram.com/{{user.username}}">@{{user.username}}!</a></h1>
+
+  <p class="lead">Gender: {{user.gender}}</p>
+  <p class="lead">ID: {{user.id}}</p>
+</div>
+</div>
+
+<a href="/feed" class="btn btn-primary navbar-btn" id="feedbutton">View your feed!</a>
+
+<div class="container" id="photoscont">
+<div class="page-header">
+  <h1>These are the photos you have liked</h1>
+</div>
+
 {{#each photos}}
-  <img src="{{url}}" class="img-responsive" class="img hashtag-img">
+<div class="">
+    <div class="thumbnail" id="smallimages">
+      <img src="{{url}}">
+      <div class="caption">
+        <p>{{caption}}</p>
+      </div>
+    </div>
+  </div>
 {{/each}}
+</div>
+
+
+
+
+<a class="btn btn-danger" id="logoutbutton" href="/" role="button">Logout</a>
+
 

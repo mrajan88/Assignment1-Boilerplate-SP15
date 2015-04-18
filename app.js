@@ -154,7 +154,7 @@ function ensureAuthenticated(req, res, next) {
   res.redirect('/login');
 }
 
-function ensureFacebookAuthenticated(req, res, next) {
+function ensureAuthenticatedFacebook(req, res, next) {
   if(req.isAuthenticated() && req.user.provider === 'facebook') {
     return next();
   }
@@ -162,7 +162,7 @@ function ensureFacebookAuthenticated(req, res, next) {
   res.redirect('/login');
 }
 
-function ensureIgAuthenticated(req, res, next) {
+function ensureAuthenticatedInstagram(req, res, next) {
   if(req.isAuthenticated() && req.user.provider === 'instagram') {
     return next();
   }
@@ -179,14 +179,24 @@ app.get('/login', function(req, res){
   res.render('login', { user: req.user });
 });
 
-
 app.get('/account', ensureAuthenticated, function(req, res){
+  var temp={};
+  temp.user = req.user;
+  if(req.user.provider === 'instagram') {
+    res.render('account', { instagramAccount: temp });
+  }
+  else if(req.user.provider === 'facebook') {
+    res.render('facebookAccount', { facebookAccount: temp });
+  }
+});
+
+app.get('/feed', ensureAuthenticatedInstagram, function(req, res){
   if(req.user.provider === 'instagram') {
       var query  = models.User.where({ name: req.user.username });
       query.findOne(function (err, user) {
        if (err) return handleError(err);
         if (user) {
-        // doc may be null if no document matched
+          // doc may be null if no document matched
          Instagram.users.self({
           access_token: user.access_token,
           complete: function(data) {
@@ -194,7 +204,7 @@ app.get('/account', ensureAuthenticated, function(req, res){
             var imageArr = data.map(function(item) {
               //create temporary json object
               tempJSON = {};
-              tempJSON.url = item.images.low_resolution.url;
+              tempJSON.url = item.images.standard_resolution.url;
               tempJSON.caption = item.caption.text;
               //insert json object into image array
               return tempJSON;
@@ -205,32 +215,34 @@ app.get('/account', ensureAuthenticated, function(req, res){
       }
    });
   }
-  else if(req.user.provider === 'facebook') {
-    res.render('account', {user: req.user, isFacebook : true });
-  } else {
-    res.render('account', { user: req.user });
-  }
 });
 
-app.get('/photos', ensureAuthenticated, function(req, res){
-  var query = models.User.where({ name: req.user.username });
+app.get('/photos', ensureAuthenticatedInstagram, function(req, res){
+  var query  = models.User.where({ name: req.user.username });
   query.findOne(function (err, user) {
     if (err) return handleError(err);
     if (user) {
+      // doc may be null if no document matched
       Instagram.users.liked_by_self({
         access_token: user.access_token,
         complete: function(data) {
+          //Map will iterate through the returned data obj
           var imageArr = data.map(function(item) {
+            //create temporary json object
             tempJSON = {};
-            tempJSON.url = item.images.low_resolution.url
+            tempJSON.url = item.images.low_resolution.url;
+            tempJSON.captions = item.caption.text;
+            //insert json object into image array
             return tempJSON;
           });
-          res.render('photos', {photos: imageARR});
+          res.render('photos', {user: req.user, photos: imageArr});
         }
       });
     }
   });
 });
+
+
 
 
 // GET /auth/instagram
@@ -258,7 +270,7 @@ app.get('/auth/facebook',
 app.get('/auth/instagram/callback', 
   passport.authenticate('instagram', { failureRedirect: '/instagramlogin'}),
   function(req, res) {
-    res.redirect('/account');
+    res.redirect('/feed');
   });
 
 app.get('/auth/facebook/callback',

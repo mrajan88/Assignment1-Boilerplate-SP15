@@ -1,21 +1,18 @@
 <div class="jumbotron" id="homejumbotron">
+
 <div class="container">
+
   <h1>Hello {{user.displayName}}, AKA <a target="_blank" href="https://instagram.com/{{user.username}}">@{{user.username}}!</a></h1>
 
-  <p class="lead">Gender: {{user.gender}}</p>
-  <p class="lead">ID: {{user.id}}</p>
 </div>
 </div>
-
-
-
-
+<a href="/photos" class="btn btn-primary navbar-btn" id="feedbutton">View photos you've liked!</a>
 <div class="container" id="photoscont">
 <div class="page-header">
   <h1>Your Feed</h1>
 </div>
 {{#each photos}}
-<div class="col-xs-6 col-md-3">
+<div class="">
     <div class="thumbnail" id="smallimages">
       <img src="{{url}}">
       <div class="caption">
@@ -27,23 +24,4 @@
 </div>
 
 <a class="btn btn-danger" id="logoutbutton" href="/" role="button">Logout</a>
-
-
-<script>
-      window.fbAsyncInit = function() {
-        FB.init({
-          appId      : '404976449673369',
-          xfbml      : true,
-          version    : 'v2.3'
-        });
-      };
-      (function(d, s, id){
-         var js, fjs = d.getElementsByTagName(s)[0];
-         if (d.getElementById(id)) {return;}
-         js = d.createElement(s); js.id = id;
-         js.src = "//connect.facebook.net/en_US/sdk.js";
-         fjs.parentNode.insertBefore(js, fjs);
-       }(document, 'script', 'facebook-jssdk'));
- </script>
-
 
