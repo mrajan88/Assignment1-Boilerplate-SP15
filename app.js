@@ -209,25 +209,25 @@ app.get('/instagramaccount', ensureAuthenticatedInstagram, function(req, res){
   }
 });
 
-app.get('/facebook', ensureAuthenticatedFacebook, function(req, res){
-  var query  = models.User.where({ name: req.user.displayName });
+app.get('/facebookaccount', ensureAuthenticatedFacebook, function(req, res){
+  var query  = models.User.where({ name: req.user.username });
   query.findOne(function (err, user) {
     if (err) return handleError(err);
     if (user) {
       // doc may be null if no document matched
       graph.setAccessToken(user.access_token);
-      var params = {limit : 10};
+      
 
-      graph.get("/me/photos", params, function(err, photos){
+      graph.get('/' + req.user.id + '/photos?type=uploaded', function(err, photos){
           //Map will iterate through the returned data obj
-          var imageArr = photos.data.map(function(item) {
+          var imageArr = (photos.data).map(function(item) {
             //create temporary json object
             tempJSON = {};
-            tempJSON.url = item.picture;
+            tempJSON.url = item.source;
             //insert json object into image array
             return tempJSON;
           });
-          res.render('facebook', {photos: imageArr});
+          res.render('facebookaccount', {photos: imageArr});
       });
     }
   });
