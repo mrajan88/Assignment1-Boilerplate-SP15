@@ -119,7 +119,7 @@ passport.use(new FacebookStrategy({
         models.User.findOrCreate({}, function(err, user, created) {
           process.nextTick(function() {
 
-            return done(null, user);
+            return done(null, profile);
           });
         });
       });
