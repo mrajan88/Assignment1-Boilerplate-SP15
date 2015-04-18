@@ -274,8 +274,7 @@ app.get('/auth/instagram',
   });
 
 app.get('/auth/facebook',
-  passport.authenticate('facebook', {scope: ['email', 'user_about_me', 'user_likes',
-                         'user_birthday', 'publish_actions', 'user_photos']}),
+  passport.authenticate('facebook'),
   function(req, res){
     // The request will be redirected to Facebook for authentication, so this
     // function will not be called.
@@ -295,7 +294,7 @@ app.get('/auth/instagram/callback',
   });
 
 app.get('/auth/facebook/callback',
-  passport.authenticate('facebook', {failureRedirect: '/login'}),
+  passport.authenticate('facebook', {failureRedirect: '/facebooklogin'}),
   function(req, res) {
     Facebook.setAccessToken(req.user.access_token);
     res.redirect('/facebookaccount');
