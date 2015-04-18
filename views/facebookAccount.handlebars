@@ -4,6 +4,20 @@
 
   <h1>Hello {{user.displayName}}! </h1>
 
+ </div>
+{{#each photos}}
+<div class="">
+    <div class="thumbnail" id="smallimages">
+      <img src="{{url}}">
+      <div class="caption">
+        <p>{{caption}}</p>
+      </div>
+    </div>
+  </div>
+{{/each}}
+</div>
+
+
 <img src="{{cover.source}}">  
 
 </div>
