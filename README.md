@@ -1,7 +1,15 @@
-Instagram Example
-===========
+COGS 121 Assignment 1
 
-Discussion 1:
+Mayone Rajan - A10989334
+Christian Memije - A10569013
 
-Instagram example for COGS 121
-Every commit will provide a step by step introduction to creating a web application overview.
+
+Social Media Analyzer 2.0
+
+Instagram
+
+Displays your feed with captions, and the photos you have liked.
+
+Facebook
+
+Under development. Will allow users to view their biggest fans by analyzing who has liked the user's photos. 
