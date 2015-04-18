@@ -18,8 +18,6 @@ var util = require('util');
 var logger = require('morgan');
 var methodOverride = require('method-override');
 var graph = require('fbgraph');
-var FB = require('fb');
-var app = express();
 
 //local dependencies
 var models = require('./models');
@@ -118,7 +116,9 @@ passport.use(new FacebookStrategy({
         // created will be true here
         models.User.findOrCreate({}, function(err, user, created) {
           process.nextTick(function() {
-            return done(null, profile);
+            Facebook.setAccessToken(accessToken);
+            Facebook.setAppSecret(FACEBOOK_APP_SECRET);
+            return done(null, user);
           });
         });
       });
@@ -179,28 +179,10 @@ app.get('/login', function(req, res){
   res.render('login', { user: req.user });
 });
 
-app.get('/account', ensureAuthenticated, function(req, res){
+app.get('/instagramaccount', ensureAuthenticatedInstagram, function(req, res){
   var temp={};
-  var query  = models.User.where({ name: req.user.username });
-  query.findOne(function (err, user) {
   temp.user = req.user;
-  if(req.user.provider === 'instagram') {
-    res.render('feed', { instagramAccount: temp });
-  }
-  else if(req.user.provider === 'facebook') {
-      graph.setAccessToken(user.access_token);
-      graph.get('/me', function(err, data) {
-        console.log(data);
-        res.render('facebookAccount',  {user: req.user, profile: data});
-      });
-    } 
-  });   
-});
-
-
-
-app.get('/feed', ensureAuthenticatedInstagram, function(req, res){
-  if(req.user.provider === 'instagram') {
+    if(req.user.provider === 'instagram') {
       var query  = models.User.where({ name: req.user.username });
       query.findOne(function (err, user) {
        if (err) return handleError(err);
@@ -218,13 +200,39 @@ app.get('/feed', ensureAuthenticatedInstagram, function(req, res){
               //insert json object into image array
               return tempJSON;
             });
-            res.render('feed', {user: req.user, photos: imageArr});
+            res.render('instagramaccount', {user: req.user, photos: imageArr});
           }
        }); 
       }
    });
   }
 });
+
+app.get('/facebookaccount', ensureAuthenticatedFacebook, function(req, res){
+  var query  = models.User.where({ name: req.user.username });
+  query.findOne(function (err, user) {
+    if (err) return handleError(err);
+    if (user) {
+      Facebook.setAccessToken(req.user.access_token);
+      // doc may be null if no document matched
+      Facebook.user.photos({
+        access_token: user.access_token,
+        complete: function(data) {
+          //Map will iterate through the returned data obj
+          var imageArr = data.map(function(item) {
+            //create temporary json object
+            tempJSON = {};
+            tempJSON.url = item.images.low_resolution.url;
+            //insert json object into image array
+            return tempJSON;
+          });
+          res.render('facebookaccount', {photos: imageArr});
+        }
+      }); 
+    }
+  });
+});
+
 
 app.get('/photos', ensureAuthenticatedInstagram, function(req, res){
   var query  = models.User.where({ name: req.user.username });
@@ -250,10 +258,6 @@ app.get('/photos', ensureAuthenticatedInstagram, function(req, res){
     }
   });
 });
-
-
-
-
 
 
 // GET /auth/instagram
@@ -286,14 +290,14 @@ app.get('/auth/facebook',
 app.get('/auth/instagram/callback', 
   passport.authenticate('instagram', { failureRedirect: '/instagramlogin'}),
   function(req, res) {
-    res.redirect('/account');
+    res.redirect('/instagramaccount');
   });
 
 app.get('/auth/facebook/callback',
   passport.authenticate('facebook', {failureRedirect: '/facebooklogin'}),
   function(req, res) {
     Facebook.setAccessToken(req.user.access_token);
-    res.redirect('/account');
+    res.redirect('/facebookaccount');
   }
 );
 
