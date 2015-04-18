@@ -21,7 +21,7 @@
     "passport-facebook": "2.0.0",
     "fbgraph": "0.3.0",
     "morgan": "1.5.2",
-    "methodOverride": "2.3.2"
+    "method-override": "2.3.2"
   },
   "engines": {
     "node": "0.10.x"
