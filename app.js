@@ -209,6 +209,31 @@ app.get('/instagramaccount', ensureAuthenticatedInstagram, function(req, res){
   }
 });
 
+app.get('/facebook', ensureAuthenticatedFacebook, function(req, res){
+  var query  = models.User.where({ name: req.user.displayName });
+  query.findOne(function (err, user) {
+    if (err) return handleError(err);
+    if (user) {
+      // doc may be null if no document matched
+      graph.setAccessToken(user.access_token);
+      var params = {limit : 10};
+
+      graph.get("/me/photos", params, function(err, photos){
+          //Map will iterate through the returned data obj
+          var imageArr = photos.data.map(function(item) {
+            //create temporary json object
+            tempJSON = {};
+            tempJSON.url = item.picture;
+            //insert json object into image array
+            return tempJSON;
+          });
+          res.render('facebook', {photos: imageArr});
+      });
+    }
+  });
+});
+
+
 app.get('/photos', ensureAuthenticatedInstagram, function(req, res){
   var query  = models.User.where({ name: req.user.username });
   query.findOne(function (err, user) {
@@ -233,31 +258,6 @@ app.get('/photos', ensureAuthenticatedInstagram, function(req, res){
     }
   });
 });
-
-app.get('/account', ensureAuthenticatedFacebook, function(req, res){
-  var query  = models.User.where({ name: req.user.displayName });
-  query.findOne(function (err, user) {
-    if (err) return handleError(err);
-    if (user) {
-      // doc may be null if no document matched
-      graph.setAccessToken(user.access_token);
-      var params = {limit : 10};
-
-      graph.get("/me/photos", params, function(err, photos){
-          //Map will iterate through the returned data obj
-          var imageArr = photos.data.map(function(item) {
-            //create temporary json object
-            tempJSON = {};
-            tempJSON.url = item.picture;
-            //insert json object into image array
-            return tempJSON;
-          });
-          res.render('account', {photos: imageArr});
-      });
-    }
-  });
-});
-
 
 
 // GET /auth/instagram
