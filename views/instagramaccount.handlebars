@@ -1,0 +1,27 @@
+<div class="jumbotron" id="homejumbotron">
+
+<div class="container">
+
+  <h1>Hello {{user.displayName}}, AKA <a target="_blank" href="https://instagram.com/{{user.username}}">@{{user.username}}!</a></h1>
+
+</div>
+</div>
+<a href="/photos" class="btn btn-primary navbar-btn" id="feedbutton">View photos you've liked!</a>
+<div class="container" id="photoscont">
+<div class="page-header">
+  <h1>Your Feed</h1>
+</div>
+{{#each photos}}
+<div class="">
+    <div class="thumbnail" id="smallimages">
+      <img src="{{url}}">
+      <div class="caption">
+        <p>{{caption}}</p>
+      </div>
+    </div>
+  </div>
+{{/each}}
+</div>
+
+<a class="btn btn-danger" id="logoutbutton" href="/" role="button">Logout</a>
+
