@@ -209,32 +209,6 @@ app.get('/instagramaccount', ensureAuthenticatedInstagram, function(req, res){
   }
 });
 
-app.get('/facebookaccount', ensureAuthenticatedFacebook, function(req, res){
-  var query  = models.User.where({ name: req.user.username });
-  query.findOne(function (err, user) {
-    if (err) return handleError(err);
-    if (user) {
-      Facebook.setAccessToken(req.user.access_token);
-      // doc may be null if no document matched
-      Facebook.user.photos({
-        access_token: user.access_token,
-        complete: function(data) {
-          //Map will iterate through the returned data obj
-          var imageArr = data.map(function(item) {
-            //create temporary json object
-            tempJSON = {};
-            tempJSON.url = item.images.low_resolution.url;
-            //insert json object into image array
-            return tempJSON;
-          });
-          res.render('facebookaccount', {photos: imageArr});
-        }
-      }); 
-    }
-  });
-});
-
-
 app.get('/photos', ensureAuthenticatedInstagram, function(req, res){
   var query  = models.User.where({ name: req.user.username });
   query.findOne(function (err, user) {
@@ -261,6 +235,7 @@ app.get('/photos', ensureAuthenticatedInstagram, function(req, res){
 });
 
 
+
 // GET /auth/instagram
 //   Use passport.authenticate() as route middleware to authenticate the
 //   request.  The first step in Instagram authentication will involve
@@ -274,7 +249,8 @@ app.get('/auth/instagram',
   });
 
 app.get('/auth/facebook',
-  passport.authenticate('facebook'),
+  passport.authenticate('facebook', {scope: ['email', 'user_about_me', 'user_likes',
+                         'user_birthday', 'publish_actions', 'user_photos']}),
   function(req, res){
     // The request will be redirected to Facebook for authentication, so this
     // function will not be called.
