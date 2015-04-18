@@ -181,14 +181,23 @@ app.get('/login', function(req, res){
 
 app.get('/account', ensureAuthenticated, function(req, res){
   var temp={};
+  var query  = models.User.where({ name: req.user.username });
+  query.findOne(function (err, user) {
   temp.user = req.user;
   if(req.user.provider === 'instagram') {
-    res.render('account', { instagramAccount: temp });
+    res.render('feed', { instagramAccount: temp });
   }
   else if(req.user.provider === 'facebook') {
-    res.render('facebookAccount', { facebookAccount: temp });
-  }
+      graph.setAccessToken(user.access_token);
+      graph.get('/me', function(err, data) {
+        console.log(data);
+        res.render('facebookAccount',  {user: req.user, profile: data});
+      });
+    } 
+  });   
 });
+
+
 
 app.get('/feed', ensureAuthenticatedInstagram, function(req, res){
   if(req.user.provider === 'instagram') {
@@ -209,7 +218,7 @@ app.get('/feed', ensureAuthenticatedInstagram, function(req, res){
               //insert json object into image array
               return tempJSON;
             });
-            res.render('account', {user: req.user, photos: imageArr});
+            res.render('feed', {user: req.user, photos: imageArr});
           }
        }); 
       }
@@ -245,6 +254,8 @@ app.get('/photos', ensureAuthenticatedInstagram, function(req, res){
 
 
 
+
+
 // GET /auth/instagram
 //   Use passport.authenticate() as route middleware to authenticate the
 //   request.  The first step in Instagram authentication will involve
@@ -258,7 +269,12 @@ app.get('/auth/instagram',
   });
 
 app.get('/auth/facebook',
-  passport.authenticate('facebook', {scope: ['email, user_about_me, user_birthday']})
+  passport.authenticate('facebook', {scope: ['email', 'user_about_me', 'user_likes',
+                         'user_birthday', 'publish_actions', 'user_photos']}),
+  function(req, res){
+    // The request will be redirected to Facebook for authentication, so this
+    // function will not be called.
+  }
 );
 
 
@@ -270,7 +286,7 @@ app.get('/auth/facebook',
 app.get('/auth/instagram/callback', 
   passport.authenticate('instagram', { failureRedirect: '/instagramlogin'}),
   function(req, res) {
-    res.redirect('/feed');
+    res.redirect('/account');
   });
 
 app.get('/auth/facebook/callback',
