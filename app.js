@@ -209,28 +209,37 @@ app.get('/instagramaccount', ensureAuthenticatedInstagram, function(req, res){
 });
 
 app.get('/facebookaccount', ensureAuthenticatedFacebook, function(req, res){
-  var query  = models.User.where({ name: req.user.username });
-  query.findOne(function (err, user) {
-    if (err) return handleError(err);
-    if (user) {
-      Facebook.setAccessToken(req.user.access_token);
-      // doc may be null if no document matched
-      Facebook.user.photos({
-        access_token: user.access_token,
-        complete: function(data) {
-          //Map will iterate through the returned data obj
-          var imageArr = data.map(function(item) {
-            //create temporary json object
-            tempJSON = {};
-            tempJSON.url = item.images.low_resolution.url;
-            //insert json object into image array
-            return tempJSON;
-          });
-          res.render('facebookaccount', {photos: imageArr});
+    Facebook.get('/me/photos?access_token=' + req.user.facebook.access_token, 
+      function(err, response) {
+        for (var i = 0; i < response.data.length; i++) {
+          var item = response.data[i];
+
+          // Get some metadata about the photo and save it all to 'imageArr'
+          var tempJSON = {};
+          tempJSON.image_url = item.source;
+          tempJSON.link = item.link;
+          tempJSON.provider = 'Facebook';
+
+          if (item.name) {
+            tempJSON.caption = item.name;
+          } else {
+            tempJSON.caption = null;
+          }
+          if (item.from.id == req.user.facebook.id) {
+            tempJSON.from = 'You';
+          } else {
+            tempJSON.from = item.from.name;
+          }
+
+          var date = new Date(item.created_time);
+          tempJSON.timestamp = date.getTime();
+          tempJSON.day = date.getDate();
+          tempJSON.month = date.getMonth() + 1;
+          tempJSON.year = date.getFullYear();
+          imageArr.push(tempJSON);
         }
-      }); 
-    }
-  });
+        async_finished();
+    });
 });
 
 
