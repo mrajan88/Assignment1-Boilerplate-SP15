@@ -295,7 +295,7 @@ app.get('/auth/instagram/callback',
   });
 
 app.get('/auth/facebook/callback',
-  passport.authenticate('facebook', {failureRedirect: '/facebooklogin'}),
+  passport.authenticate('facebook', {failureRedirect: '/login'}),
   function(req, res) {
     Facebook.setAccessToken(req.user.access_token);
     res.redirect('/facebookaccount');
